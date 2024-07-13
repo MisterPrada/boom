@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import EventEmitter from './EventEmitter.js'
 
 export default class Resources extends EventEmitter
@@ -52,6 +53,17 @@ export default class Resources extends EventEmitter
             else if(source.type === 'objModel')
             {
                 this.loaders.objLoader.load(
+                    source.path,
+                    (file) =>
+                    {
+                        this.sourceLoaded(source, file)
+                    }
+                )
+            }
+            else if(source.type === 'fbxModel')
+            {
+                this.loaders.fbxLoader = new FBXLoader()
+                this.loaders.fbxLoader.load(
                     source.path,
                     (file) =>
                     {

@@ -10,6 +10,11 @@ export default [
     //     path: '/models/predator.glb'
     // },
     {
+        name: 'groundModel',
+        type: 'fbxModel',
+        path: '/models/ground.fbx'
+    },
+    {
         name: 'displacementTexture',
         type: 'texture',
         path: '/textures/displacement.jpg'
