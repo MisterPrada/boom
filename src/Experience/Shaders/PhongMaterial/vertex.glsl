@@ -40,22 +40,38 @@ uniform float u_Progress;
 //    );
 //}
 
-vec2 rotate(vec2 uv, float angle)
-{
-    return vec2(
-        uv.x * cos(angle) - uv.y * sin(angle),
-        uv.x * sin(angle) + uv.y * cos(angle)
+mat4 rotationMatrix(vec3 axis, float angle) {
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
+    float oneMinusCos = 1.0 - cosAngle;
+
+    axis = normalize(axis);
+
+    return mat4(
+    cosAngle + axis.x * axis.x * oneMinusCos,
+    axis.x * axis.y * oneMinusCos - axis.z * sinAngle,
+    axis.x * axis.z * oneMinusCos + axis.y * sinAngle,
+    0.0,
+
+    axis.y * axis.x * oneMinusCos + axis.z * sinAngle,
+    cosAngle + axis.y * axis.y * oneMinusCos,
+    axis.y * axis.z * oneMinusCos - axis.x * sinAngle,
+    0.0,
+
+    axis.z * axis.x * oneMinusCos - axis.y * sinAngle,
+    axis.z * axis.y * oneMinusCos + axis.x * sinAngle,
+    cosAngle + axis.z * axis.z * oneMinusCos,
+    0.0,
+
+    0.0, 0.0, 0.0, 1.0
     );
 }
 
-mat3 rotate3dY(float angle)
-{
-    return mat3(
-        cos(angle), 0.0, sin(angle),
-        0.0, 1.0, 0.0,
-        -sin(angle), 0.0, cos(angle)
-    );
+vec4 rotateVertex(vec4 vertex, vec3 direction, float angle) {
+    mat4 rotMatrix = rotationMatrix(direction, angle);
+    return rotMatrix * vertex;
 }
+
 
 void main() {
 
@@ -101,12 +117,18 @@ void main() {
 //    }
 
 
-    vec2 uvv = uv1.xy;
 
-    float dist = (90.0 - length(uv1.xy)) * (distance(uv1.xy, transformed.xy) * 0.01 + 1.3);
+    float dist = u_Progress * (90.0 - length(uv1.xy)) * (distance(uv1.xy, transformed.xy) * 0.01 + 1.3);
 
     transformed.z += u_Progress * dist;
     transformed.z = max(transformed.z, 0.0);
+
+    //set direction from center uv1.xy
+    vec3 direction = normalize(vec3(uv1.xy - 0.5, 0.0));
+
+    float angle = radians(45.0);
+    transformed += u_Progress * rotateVertex(transformed.xyzz, direction, angle).xyz;
+
     //transformed.yz += rotate(transformed.xy, u_Progress * dist);
     //transformed.xz = rotate(transformed.xz, u_Progress);
 
