@@ -15,14 +15,15 @@
     "lil-gui": "^0.19.2",
     "normalize-wheel": "^1.0.1",
     "patch-package": "^8.0.0",
+    "postprocessing": "^6.35.6",
     "simplex-noise": "^4.0.1",
     "stats.js": "^0.17.0",
     "three": "^0.166.1",
     "vite": "^4.3.1",
     "vite-plugin-glsl": "^1.2.1",
-    "vite-plugin-terminal": "^1.2.0",
-    "postprocessing": "^6.35.6"
+    "vite-plugin-terminal": "^1.2.0"
   },
   "dependencies": {
+    "three-subdivide": "^1.1.5"
   }
 }

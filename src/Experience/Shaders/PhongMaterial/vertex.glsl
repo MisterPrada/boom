@@ -21,9 +21,8 @@ varying vec3 vViewPosition;
 attribute vec2 uv1;
 attribute vec2 uv2;
 
+uniform float u_Time;
 uniform float u_Progress;
-
-//uniform float u_Time;
 //uniform float u_FlowFieldFrequency;
 //uniform float u_FlowFieldStrength;
 //uniform float u_TimeScale;
@@ -48,28 +47,34 @@ mat4 rotationMatrix(vec3 axis, float angle) {
     axis = normalize(axis);
 
     return mat4(
-    cosAngle + axis.x * axis.x * oneMinusCos,
-    axis.x * axis.y * oneMinusCos - axis.z * sinAngle,
-    axis.x * axis.z * oneMinusCos + axis.y * sinAngle,
-    0.0,
+        cosAngle + axis.x * axis.x * oneMinusCos,
+        axis.x * axis.y * oneMinusCos - axis.z * sinAngle,
+        axis.x * axis.z * oneMinusCos + axis.y * sinAngle,
+        0.0,
 
-    axis.y * axis.x * oneMinusCos + axis.z * sinAngle,
-    cosAngle + axis.y * axis.y * oneMinusCos,
-    axis.y * axis.z * oneMinusCos - axis.x * sinAngle,
-    0.0,
+        axis.y * axis.x * oneMinusCos + axis.z * sinAngle,
+        cosAngle + axis.y * axis.y * oneMinusCos,
+        axis.y * axis.z * oneMinusCos - axis.x * sinAngle,
+        0.0,
 
-    axis.z * axis.x * oneMinusCos - axis.y * sinAngle,
-    axis.z * axis.y * oneMinusCos + axis.x * sinAngle,
-    cosAngle + axis.z * axis.z * oneMinusCos,
-    0.0,
+        axis.z * axis.x * oneMinusCos - axis.y * sinAngle,
+        axis.z * axis.y * oneMinusCos + axis.x * sinAngle,
+        cosAngle + axis.z * axis.z * oneMinusCos,
+        0.0,
 
-    0.0, 0.0, 0.0, 1.0
+        0.0, 0.0, 0.0, 1.0
     );
 }
 
 vec4 rotateVertex(vec4 vertex, vec3 direction, float angle) {
     mat4 rotMatrix = rotationMatrix(direction, angle);
     return rotMatrix * vertex;
+}
+
+float hashVec2(vec2 p)
+{
+    p = 50.0 * fract(p * 0.3183099 + vec2(0.71, 0.113));
+    return -1.0 + 2.0 * fract( p.x * p.y * (p.x + p.y) );
 }
 
 
@@ -111,36 +116,44 @@ void main() {
     #include <begin_vertex>
 
 
-//    if( length(uv1) < 30.0 )
-//    {
-//        transformed.z -= 5.0 * u_Progress;
-//    }
+    // *** Three.js Coords *** //
+    vec3 finalPosion = transformed.xzy;
+    finalPosion.z *= -1.0;
+    vec3 _uv = vec3(uv1.y, uv2.y, uv1.x);
+    // *** END Three.js Coords *** //
+
+    vec3 direction = _uv;
+    direction.y *= hashVec2(_uv.xy);
+
+    float angle = 3.14 * length((110.0 - length(_uv.xz)) * 0.009) * u_Progress;
+    finalPosion = rotateVertex(vec4(finalPosion.xyz, 1.0), direction, angle).xyz;
 
 
+    //float dist = u_Progress * (110.0 - length(_uv.xz)) * (distance(_uv.xz, finalPosion.xz) * 0.01 + 1.3);
+    float dist = u_Progress * pow( 110.0 - length(_uv.xz), 1.2) ;
+    float newY = u_Progress * dist + 2.0 * sin(u_Time + _uv.x) * u_Progress;
 
-    float dist = u_Progress * (90.0 - length(uv1.xy)) * (distance(uv1.xy, transformed.xy) * 0.01 + 1.3);
+    //finalPosion.xz += _uv.xz * u_Progress;
 
-    transformed.z += u_Progress * dist;
-    transformed.z = max(transformed.z, 0.0);
+    if( newY > 0.0 ) {
+        finalPosion.y += newY;
+    }
 
-    //set direction from center uv1.xy
-    vec3 direction = normalize(vec3(uv1.xy - 0.5, 0.0));
+    vec4 transformedModel = modelMatrix * vec4(transformed, 1.0);
 
-    float angle = radians(45.0);
-    transformed += u_Progress * rotateVertex(transformed.xyzz, direction, angle).xyz;
-
-    //transformed.yz += rotate(transformed.xy, u_Progress * dist);
-    //transformed.xz = rotate(transformed.xz, u_Progress);
-
-    //transformed.z -= u_Progress * (100.0 - distance(uv1.xy, transformed.xy)) * 0.9;
+    finalPosion.y += sin(length(transformedModel.xz) * 0.1 - u_Time) * 2.0;
 
 
-
+    // *** Three.js Coords comeback *** //
+    transformed.xzy = finalPosion.xyz;
+    transformed.y *= -1.0;
+    // *** END Three.js Coords comeback *** //
 
 
     #include <morphtarget_vertex>
     #include <skinning_vertex>
     #include <displacementmap_vertex>
+
     #include <project_vertex>
     #include <logdepthbuf_vertex>
     #include <clipping_planes_vertex>

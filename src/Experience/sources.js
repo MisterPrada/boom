@@ -14,9 +14,33 @@ export default [
         type: 'fbxModel',
         path: '/models/ground.fbx'
     },
+
+    // Textures
     {
         name: 'displacementTexture',
         type: 'texture',
         path: '/textures/displacement.jpg'
+    },
+    {
+        name: 'backgroundTexture',
+        type: 'texture',
+        path: '/textures/background.png'
+    },
+
+    // Ground
+    {
+        name: 'groundColorTexture',
+        type: 'texture',
+        path: '/textures/ground/GroundDirtWeedsPatchy004_COL_1K.jpg'
+    },
+    {
+        name: 'groundNormalTexture',
+        type: 'texture',
+        path: '/textures/ground/GroundDirtWeedsPatchy004_NRM_1K.jpg'
+    },
+    {
+        name: 'groundDisplacementTexture',
+        type: 'texture',
+        path: '/textures/ground/GroundDirtWeedsPatchy004_DISP_1K.jpg'
     }
 ]

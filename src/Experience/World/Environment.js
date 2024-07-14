@@ -13,6 +13,7 @@ export default class Environment {
 
         this.setAmbientLight()
         this.setDirectionalLight()
+        this.setEnvironmentMap()
 
         this.setDebug()
     }
@@ -40,7 +41,10 @@ export default class Environment {
         // //environment.dispose();
 
         // //set background transparent
-        // this.scene.background = null;
+        this.scene.background = this.resources.items.backgroundTexture;
+        this.scene.background.colorSpace = THREE.SRGBColorSpace;
+
+        this.scene.environment = this.scene.background
 
     }
 
