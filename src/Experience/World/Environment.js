@@ -11,6 +11,8 @@ export default class Environment {
 
         this.scene.colorSpace = THREE.SRGBColorSpace
 
+        //this.scene.fog = new THREE.Fog( '#ffffff', 2, 400 )
+
         this.setAmbientLight()
         this.setDirectionalLight()
         this.setEnvironmentMap()

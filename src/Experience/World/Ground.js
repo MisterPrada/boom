@@ -23,6 +23,12 @@ export default class Ground extends Model {
 
     u_Progress = 0
 
+    u_ProgressImpulse = 0
+    u_Period = 2.0
+    u_CenterImpulse = 5.0
+    u_Sigma = 1.0 // width of the impulse
+
+
     constructor() {
         super()
 
@@ -68,7 +74,6 @@ export default class Ground extends Model {
         this.basicGround.rotation.x = Math.PI / 2
         this.basicGround.position.y = -0.1
         this.scene.add( this.basicGround )
-
     }
 
     setModel() {
@@ -77,27 +82,27 @@ export default class Ground extends Model {
         //this.model.rotation.x = Math.PI / 2;
 
         // set matrix rotation Math.PI / 2;
-        this.model.applyMatrix4(new THREE.Matrix4().makeRotationX(- Math.PI / 2));
+        this.model.applyMatrix4( new THREE.Matrix4().makeRotationX( -Math.PI / 2 ) );
 
 
-        const iterations = 2;
+        const iterations = 1.0;
 
         const params = {
-            split:          true,       // optional, default: true
-            uvSmooth:       false,      // optional, default: false
-            preserveEdges:  false,      // optional, default: false
-            flatOnly:       true,      // optional, default: false
-            maxTriangles:   Infinity,   // optional, default: Infinity
+            split: true,       // optional, default: true
+            uvSmooth: false,      // optional, default: false
+            preserveEdges: false,      // optional, default: false
+            flatOnly: true,      // optional, default: false
+            maxTriangles: Infinity,   // optional, default: Infinity
         };
 
 
-        this.model.traverse((child) => {
-            if (child.isMesh) {
-                child.geometry = LoopSubdivision.modify(child.geometry, iterations, params);
+        this.model.traverse( ( child ) => {
+            if ( child.isMesh ) {
+                //child.geometry = LoopSubdivision.modify( child.geometry, iterations, params );
                 child.frustumCulled = false
                 this.material = child.material
             }
-        })
+        } )
 
         this.material.map = this.groundColorTexture
         this.material.normalMap = this.groundNormalTexture
@@ -105,18 +110,21 @@ export default class Ground extends Model {
         //this.material.wireframe = true
 
 
-        this.material.onBeforeCompile = (shader) => {
+        this.material.onBeforeCompile = ( shader ) => {
             shader.vertexShader = vertexShader
 
             this.material.uniforms = shader.uniforms
-            this.material.uniforms.u_Time =  new THREE.Uniform(0)
-            this.material.uniforms.u_Progress = new THREE.Uniform(this.u_Progress)
-
+            this.material.uniforms.u_Time = new THREE.Uniform( 0 )
+            this.material.uniforms.u_Progress = new THREE.Uniform( this.u_Progress )
+            this.material.uniforms.u_Period = new THREE.Uniform( this.u_Period )
+            this.material.uniforms.u_CenterImpulse = new THREE.Uniform( this.u_CenterImpulse )
+            this.material.uniforms.u_Sigma = new THREE.Uniform( this.u_Sigma )
+            this.material.uniforms.u_ProgressImpulse = new THREE.Uniform( this.u_ProgressImpulse )
         }
 
 
-        this.container.add(this.model);
-        this.scene.add(this.container);
+        this.container.add( this.model );
+        this.scene.add( this.container );
     }
 
     resize() {
@@ -129,14 +137,32 @@ export default class Ground extends Model {
         this.debugFolder = this.debug.panel.addFolder( 'ground' );
         this.debugFolder.add( this, 'u_Progress', 0.0, 1, 0.001 ).onChange( () => {
             this.material.uniforms.u_Progress.value = this.u_Progress
-        })
+        } )
+
+        this.debugFolder.add( this, 'u_ProgressImpulse', 0.0, 1, 0.001 ).onChange( () => {
+            this.material.uniforms.u_ProgressImpulse.value = this.u_ProgressImpulse
+        } )
+
+        this.debugFolder.add( this, 'u_Period', 0.0, 10, 0.001 ).onChange( () => {
+            this.material.uniforms.u_Period.value = this.u_Period
+        } )
+
+        this.debugFolder.add( this, 'u_CenterImpulse', 0.0, 10, 0.001 ).onChange( () => {
+            this.material.uniforms.u_CenterImpulse.value = this.u_CenterImpulse
+        } )
+
+        this.debugFolder.add( this, 'u_Sigma', 0.0, 10, 0.001 ).onChange( () => {
+            this.material.uniforms.u_Sigma.value = this.u_Sigma
+        } )
+
+
 
 
         //this.debug.createDebugTexture( this.resources.items.displacementTexture )
     }
 
     update( deltaTime ) {
-        if(this.material.uniforms) {
+        if ( this.material.uniforms ) {
             this.material.uniforms.u_Time.value = this.time.elapsed
         }
     }

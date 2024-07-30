@@ -23,8 +23,8 @@ export default class Camera
 
     setInstance()
     {
-        this.instance = new THREE.PerspectiveCamera(25, this.sizes.width / this.sizes.height, 0.1, 1000)
-        this.defaultCameraPosition = new THREE.Vector3(-0.5, 40.5, 120);
+        this.instance = new THREE.PerspectiveCamera(25, this.sizes.width / this.sizes.height, 0.1, 3000)
+        this.defaultCameraPosition = new THREE.Vector3(-0.5, 40.5, 520);
 
         this.instance.position.copy(this.defaultCameraPosition)
         this.instance.lookAt(new THREE.Vector3(0, 0, 0));
@@ -39,7 +39,7 @@ export default class Camera
         this.controls = new OrbitControls(this.instance, this.canvas)
         this.controls.enableDamping = true
         this.controls.minDistance = 0;
-        this.controls.maxDistance = 500;
+        this.controls.maxDistance = 1000;
         this.controls.enabled = true;
         this.controls.target = new THREE.Vector3(0, 0, 0);
 

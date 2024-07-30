@@ -6,6 +6,8 @@ import State from "../State.js";
 import Time from "../Utils/Time.js";
 import EventEmitter from '@experience/Utils/EventEmitter.js';
 import Ground from "./Ground.js";
+import Lines from "./Lines.js";
+import BlackHole from "./BlackHole.js";
 
 export default class World extends EventEmitter{
     constructor() {
@@ -50,6 +52,8 @@ export default class World extends EventEmitter{
     setupWorld() {
         // Setup
         this.ground = new Ground()
+        //this.blackHole = new BlackHole()
+        //this.lines = new Lines()
         this.environment = new Environment()
 
         // Add debug helpers
@@ -100,12 +104,16 @@ export default class World extends EventEmitter{
     resize() {
         this.state.resize()
         this.ground?.resize()
+        this.lines?.resize()
+        this.blackHole?.resize()
     }
 
     update( deltaTime ) {
         this.debugHelpers?.update( deltaTime )
         this.cube?.update( deltaTime )
         this.ground?.update( deltaTime )
+        this.lines?.update( deltaTime )
+        this.blackHole?.update( deltaTime )
     }
 
     postUpdate( deltaTime ) {

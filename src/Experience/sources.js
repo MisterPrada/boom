@@ -14,6 +14,11 @@ export default [
         type: 'fbxModel',
         path: '/models/ground.fbx'
     },
+    {
+        name: 'linesModel',
+        type: 'gltfModel',
+        path: '/models/lines.glb'
+    },
 
     // Textures
     {

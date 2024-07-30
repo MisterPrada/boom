@@ -242,9 +242,9 @@ export default class PostProcess {
 
     bloomRender() {
         if ( this.unrealBloomPass.enabled ) {
-            this.scene.traverse( this.materials._darkenNonBloomed )
+            //this.scene.traverse( this.materials._darkenNonBloomed )
             this.bloomComposer.render()
-            this.scene.traverse( this.materials._restoreMaterial )
+            //this.scene.traverse( this.materials._restoreMaterial )
         }
 
     }

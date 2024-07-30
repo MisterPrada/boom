@@ -23,6 +23,11 @@ attribute vec2 uv2;
 
 uniform float u_Time;
 uniform float u_Progress;
+uniform float u_ProgressImpulse;
+uniform float u_Period;
+uniform float u_CenterImpulse;
+uniform float u_Sigma; // width of the impulse
+
 //uniform float u_FlowFieldFrequency;
 //uniform float u_FlowFieldStrength;
 //uniform float u_TimeScale;
@@ -115,37 +120,102 @@ void main() {
 
     #include <begin_vertex>
 
+    // World Position
+    vec4 transformedModel = modelMatrix * vec4(transformed, 1.0);
 
     // *** Three.js Coords *** //
-    vec3 finalPosion = transformed.xzy;
-    finalPosion.z *= -1.0;
-    vec3 _uv = vec3(uv1.y, uv2.y, uv1.x);
+    vec3 finalPosition = transformed.xzy;
+    finalPosition.z *= -1.0;
+    vec3 _uv = vec3(uv1.x, uv2.y, uv1.y);
     // *** END Three.js Coords *** //
 
-    vec3 direction = _uv;
+    vec3 direction = _uv.zyx;
     direction.y *= hashVec2(_uv.xy);
 
-    float angle = 3.14 * length((110.0 - length(_uv.xz)) * 0.009) * u_Progress;
-    finalPosion = rotateVertex(vec4(finalPosion.xyz, 1.0), direction, angle).xyz;
+    float wave = max((140.0 - length(_uv.xz)) - 140.0 * (1.0 - u_Progress), 0.0 ) / 200.0;
+    wave = sqrt(wave);
+
+    float angle = 3.14 * length((110.0 - length(_uv.xz)) * 0.009) * wave;
+    finalPosition = rotateVertex(vec4(finalPosition.xyz, 1.0), direction, angle).xyz;
 
 
-    //float dist = u_Progress * (110.0 - length(_uv.xz)) * (distance(_uv.xz, finalPosion.xz) * 0.01 + 1.3);
+
     float dist = u_Progress * pow( 110.0 - length(_uv.xz), 1.2) ;
     float newY = u_Progress * dist + 2.0 * sin(u_Time + _uv.x) * u_Progress;
 
-    //finalPosion.xz += _uv.xz * u_Progress;
+    //finalPosition.xz += transformedModel.xz * u_Progress;
+
+
+    //finalPosition.xz += transformedModel.xz * (140.0 - length(_uv.xz)) * wave * 0.01;
+    //finalPosition.xz += transformedModel.xz * wave;
+
+
 
     if( newY > 0.0 ) {
-        finalPosion.y += newY;
+        finalPosition.y += newY * (wave * 0.4);
+
+        float circle = length(transformedModel.xz) - 100.0 * u_Progress;
+        //circle = abs(circle);
+        //circle = smoothstep(0.0, 1.0, -circle);
+        //finalPosition.xz += circle * length(_uv.xz) * u_Progress;
+        //length((110.0 - length(_uv.xz)) * 0.009)
     }
 
-    vec4 transformedModel = modelMatrix * vec4(transformed, 1.0);
 
-    finalPosion.y += sin(length(transformedModel.xz) * 0.1 - u_Time) * 2.0;
+//    // Impulse function
+//    float T = u_Period;  // period
+//    float t_0 = u_CenterImpulse;  // center of the impulse
+//    float sigma = u_Sigma;  // width of the impulse
+//
+//    // Calculate the impulse
+//    float t = u_ProgressImpulse * 10.0;
+//
+//    // Function Sin
+//    float impulse = sin(2.0 * 3.14159265359 * t / T) * exp(-pow(t - t_0, 2.0) / (2.0 * sigma * sigma));
+//
+//    //finalPosition.y += impulse * sin(length(transformedModel.xz) * 0.1 - u_Time) * 2.0;
+
+
+    // Вычисляем расстояние от центра
+    float distance = length(transformedModel.xz);
+    float waveSpeed = 2.0;
+    float waveFrequency = 0.2;
+    float waveAmplitude = 4.0;
+
+    // Вычисляем фазовый сдвиг, чтобы волна распространялась наружу со временем
+    float phaseShift = u_Progress * 140.0 - (distance / waveSpeed);
+
+    // Вычисляем смещение по оси y с использованием синусоиды и фазового сдвига
+    float offsetY = sin(phaseShift * waveFrequency) * waveAmplitude;
+
+    // Применяем затухание к волне, чтобы она была только одной
+    if (phaseShift < 0.0 || phaseShift > (2.0 * 3.14159 / waveFrequency)) {
+        offsetY = 0.0;
+    } else {
+        float attenuation = smoothstep(0.0, 1.0, phaseShift * waveFrequency / 3.14159);
+        offsetY *= attenuation;
+    }
+
+    finalPosition.y -= offsetY;
+
+
+//    float circle = length(transformedModel.xz) - sin(u_Time) * 100.0;
+//    circle = abs(circle);
+//    circle = smoothstep(0.0, 1.0, circle);
+//    finalPosition.y += circle * 3.0;
+
+
+//    float circle = length(transformedModel.xz) - 50.0;
+//    circle = abs(circle);
+//    circle = smoothstep(0.0, 1.0, circle);
+//    finalPosition.y -= circle * 7.0;
+
+
+
 
 
     // *** Three.js Coords comeback *** //
-    transformed.xzy = finalPosion.xyz;
+    transformed.xzy = finalPosition.xyz;
     transformed.y *= -1.0;
     // *** END Three.js Coords comeback *** //
 
